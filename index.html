@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tienda Online</title>
+  <style>
+    body { font-family: Arial; margin: 0; background: #f5f5f5; }
+    header { background: #333; color: white; padding: 15px; text-align: center; }
+    .filtros { text-align: center; margin: 15px; }
+    .filtros button { margin: 5px; }
+    .container { display: flex; }
+    .catalogo { width: 70%; padding: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .producto { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .producto img { width: 100%; border-radius: 10px; }
+    .carrito { width: 30%; background: #fff; padding: 20px; border-left: 2px solid #ddd; }
+    button { padding: 10px; border: none; background: #28a745; color: white; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #218838; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Mi Tienda</h1>
+</header>
+
+<div class="filtros">
+  <button onclick="filtrar('todos')">Todos</button>
+  <button onclick="filtrar('remeras')">Remeras</button>
+  <button onclick="filtrar('chombas')">Chombas</button>
+  <button onclick="filtrar('otros')">Otros</button>
+</div>
+
+<div class="container">
+
+  <div class="catalogo" id="catalogo"></div>
+
+  <div class="carrito">
+    <h2>Carrito</h2>
+    <ul id="listaCarrito"></ul>
+    <p><strong>Total: $<span id="total">0</span></strong></p>
+    <button onclick="enviarWhatsApp()">Comprar por WhatsApp</button>
+  </div>
+
+</div>
+
+<script>
+  const productos = [
+    { id: 1, nombre: "Remera Básica", precio: 1000, categoria: "remeras", talles: ["S","M","L","XL"], imagen: "remera1.jpg" },
+    { id: 2, nombre: "Remera Estampada", precio: 1200, categoria: "remeras", talles: ["S","M","L"], imagen: "remera2.jpg" },
+    { id: 3, nombre: "Chomba Azul", precio: 1500, categoria: "chombas", talles: ["M","L","XL"], imagen: "chomba1.jpg" },
+    { id: 4, nombre: "Chomba Roja", precio: 1600, categoria: "chombas", talles: ["S","M","L"], imagen: "chomba2.jpg" },
+    { id: 5, nombre: "Gorra", precio: 800, categoria: "otros", talles: ["Único"], imagen: "gorra.jpg" }
+  ];
+
+  let carrito = [];
+
+  const catalogo = document.getElementById("catalogo");
+  const listaCarrito = document.getElementById("listaCarrito");
+  const totalSpan = document.getElementById("total");
+
+  function mostrarProductos(lista) {
+    catalogo.innerHTML = "";
+    lista.forEach(prod => {
+      const div = document.createElement("div");
+      div.classList.add("producto");
+      div.innerHTML = `
+        <img src="${prod.imagen}">
+        <h3>${prod.nombre}</h3>
+        <p>$${prod.precio}</p>
+        <select id="talle-${prod.id}">
+          ${prod.talles.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+        <button onclick="agregarAlCarrito(${prod.id})">Agregar</button>
+      `;
+      catalogo.appendChild(div);
+    });
+  }
+
+  function filtrar(categoria) {
+    if (categoria === 'todos') {
+      mostrarProductos(productos);
+    } else {
+      const filtrados = productos.filter(p => p.categoria === categoria);
+      mostrarProductos(filtrados);
+    }
+  }
+
+  function agregarAlCarrito(id) {
+    const producto = productos.find(p => p.id === id);
+    const talle = document.getElementById(`talle-${id}`).value;
+    carrito.push({ ...producto, talle });
+    actualizarCarrito();
+  }
+
+  function actualizarCarrito() {
+    listaCarrito.innerHTML = "";
+    let total = 0;
+
+    carrito.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = `${item.nombre} (${item.talle}) - $${item.precio}`;
+      listaCarrito.appendChild(li);
+      total += item.precio;
+    });
+
+    totalSpan.textContent = total;
+  }
+
+  function enviarWhatsApp() {
+    if (carrito.length === 0) {
+      alert("El carrito está vacío");
+      return;
+    }
+
+    let mensaje = "Hola, quiero comprar:\\n";
+
+    carrito.forEach(item => {
+      mensaje += `- ${item.nombre} (${item.talle}) ($${item.precio})\\n`;
+    });
+
+    mensaje += `\\nTotal: $${totalSpan.textContent}`;
+
+    const telefono = "5493516168133";
+    const url = `https://wa.me/${telefono}?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url, '_blank');
+  }
+
+  mostrarProductos(productos);
+</script>
+
+</body>
+</html>
